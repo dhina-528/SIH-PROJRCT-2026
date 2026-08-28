@@ -1,0 +1,52 @@
+office_name,pincode,district,state,locality,office_type,delivery,division,region,circle
+Saravanampatti,641035,Coimbatore,Tamil Nadu,Saravanampatti,Sub Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Saravanampatti East,641035,Coimbatore,Tamil Nadu,Saravanampatti,Branch Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Kovaipudur,641042,Coimbatore,Tamil Nadu,Kovaipudur,Sub Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Peelamedu,641004,Coimbatore,Tamil Nadu,Peelamedu,Sub Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+RS Puram,641002,Coimbatore,Tamil Nadu,RS Puram,Head Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Gandhipuram,641012,Coimbatore,Tamil Nadu,Gandhipuram,Head Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Coimbatore GPO,641001,Coimbatore,Tamil Nadu,Coimbatore,GPO,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Singanallur,641005,Coimbatore,Tamil Nadu,Singanallur,Sub Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Ukkadam,641001,Coimbatore,Tamil Nadu,Ukkadam,Sub Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Ganapathy,641006,Coimbatore,Tamil Nadu,Ganapathy,Sub Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Vadavalli,641041,Coimbatore,Tamil Nadu,Vadavalli,Sub Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Kuniyamuthur,641008,Coimbatore,Tamil Nadu,Kuniyamuthur,Sub Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Podanur,641023,Coimbatore,Tamil Nadu,Podanur,Sub Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Mettupalayam,641301,Coimbatore,Tamil Nadu,Mettupalayam,Sub Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Pollachi,642001,Coimbatore,Tamil Nadu,Pollachi,Head Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Sulur,641401,Coimbatore,Tamil Nadu,Sulur,Sub Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Thondamuthur,641109,Coimbatore,Tamil Nadu,Thondamuthur,Branch Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Kalapatti,641048,Coimbatore,Tamil Nadu,Kalapatti,Branch Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Neelambur,641062,Coimbatore,Tamil Nadu,Neelambur,Branch Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Vellalore,641111,Coimbatore,Tamil Nadu,Vellalore,Branch Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Sowripalayam,641028,Coimbatore,Tamil Nadu,Sowripalayam,Branch Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Ondipudur,641016,Coimbatore,Tamil Nadu,Ondipudur,Branch Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Rathinapuri,641027,Coimbatore,Tamil Nadu,Rathinapuri,Sub Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Pappanaickenpalayam,641037,Coimbatore,Tamil Nadu,Pappanaickenpalayam,Sub Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Kavundampalayam,641030,Coimbatore,Tamil Nadu,Kavundampalayam,Sub Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Annur,641653,Coimbatore,Tamil Nadu,Annur,Sub Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Kinathukadavu,642109,Coimbatore,Tamil Nadu,Kinathukadavu,Sub Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Madukkarai,641105,Coimbatore,Tamil Nadu,Madukkarai,Sub Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Chettipalayam,641201,Coimbatore,Tamil Nadu,Chettipalayam,Branch Office,Delivery,Coimbatore,Coimbatore,Tamil Nadu
+Tiruppur HO,641601,Tiruppur,Tamil Nadu,Tiruppur,Head Office,Delivery,Tiruppur,Coimbatore,Tamil Nadu
+Tiruppur,641604,Tiruppur,Tamil Nadu,Tiruppur,Sub Office,Delivery,Tiruppur,Coimbatore,Tamil Nadu
+Avinashi,641654,Tiruppur,Tamil Nadu,Avinashi,Sub Office,Delivery,Tiruppur,Coimbatore,Tamil Nadu
+Kangeyam,638701,Tiruppur,Tamil Nadu,Kangeyam,Sub Office,Delivery,Tiruppur,Coimbatore,Tamil Nadu
+Udumalpet,642126,Tiruppur,Tamil Nadu,Udumalpet,Sub Office,Delivery,Tiruppur,Coimbatore,Tamil Nadu
+Chennai GPO,600001,Chennai,Tamil Nadu,Chennai,GPO,Delivery,Chennai,Chennai,Tamil Nadu
+Anna Nagar,600040,Chennai,Tamil Nadu,Anna Nagar,Sub Office,Delivery,Chennai,Chennai,Tamil Nadu
+T Nagar,600017,Chennai,Tamil Nadu,T Nagar,Sub Office,Delivery,Chennai,Chennai,Tamil Nadu
+Adyar,600020,Chennai,Tamil Nadu,Adyar,Sub Office,Delivery,Chennai,Chennai,Tamil Nadu
+Tambaram,600045,Chennai,Tamil Nadu,Tambaram,Sub Office,Delivery,Chennai,Chennai,Tamil Nadu
+Velachery,600042,Chennai,Tamil Nadu,Velachery,Sub Office,Delivery,Chennai,Chennai,Tamil Nadu
+Madurai HO,625001,Madurai,Tamil Nadu,Madurai,Head Office,Delivery,Madurai,Madurai,Tamil Nadu
+Madurai Anna Nagar,625020,Madurai,Tamil Nadu,Anna Nagar,Sub Office,Delivery,Madurai,Madurai,Tamil Nadu
+Tiruchirappalli HO,620001,Tiruchirappalli,Tamil Nadu,Tiruchirappalli,Head Office,Delivery,Tiruchirappalli,Tiruchirappalli,Tamil Nadu
+Salem HO,636001,Salem,Tamil Nadu,Salem,Head Office,Delivery,Salem,Salem,Tamil Nadu
+Bengaluru GPO,560001,Bengaluru,Karnataka,Bengaluru,GPO,Delivery,Bengaluru,Bengaluru,Karnataka
+Indiranagar,560038,Bengaluru,Karnataka,Indiranagar,Sub Office,Delivery,Bengaluru,Bengaluru,Karnataka
+Koramangala,560034,Bengaluru,Karnataka,Koramangala,Sub Office,Delivery,Bengaluru,Bengaluru,Karnataka
+Mumbai GPO,400001,Mumbai,Maharashtra,Mumbai,GPO,Delivery,Mumbai,Mumbai,Maharashtra
+Andheri,400058,Mumbai,Maharashtra,Andheri,Sub Office,Delivery,Mumbai,Mumbai,Maharashtra
+Pune HO,411001,Pune,Maharashtra,Pune,Head Office,Delivery,Pune,Pune,Maharashtra
+Hyderabad GPO,500001,Hyderabad,Telangana,Hyderabad,GPO,Delivery,Hyderabad,Hyderabad,Telangana
