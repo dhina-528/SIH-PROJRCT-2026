@@ -1,16 +1,49 @@
-﻿__pycache__/
+﻿# Python
+__pycache__/
 **/__pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.mypy_cache/
+.pyre/
+.ruff_cache/
 .venv/
 venv/
+env/
+ENV/
+
+# Environment files
 .env
 .env.*
+!.env.example
+
+# Database / local data
+*.sqlite3
+*.db
+postal.db
+
+# Node / React
 node_modules/
-frontend/dist/
 frontend/node_modules/
+frontend/dist/
+frontend/build/
 coverage/
-.pytest_cache/
+.npm/
+.vite/
+
+# OS/editor files
 .DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
 *.log
+logs/
+
+# Build artifacts
+build/
+dist/

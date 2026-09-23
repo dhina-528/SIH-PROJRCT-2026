@@ -1,43 +1,46 @@
-# AI-Powered Indian Post Office Identifier
+# AI Post Office Identifier
 
-This project was fully developed by the author as a complete end-to-end solution for identifying the correct Indian Post Office and PIN code from messy or incomplete address data.
+<p align="center">
+  <img src="https://img.shields.io/badge/AI-Postal%20Address%20Matcher-blueviolet" alt="AI Postal Address Matcher" />
+  <img src="https://img.shields.io/badge/Python-FastAPI-3776AB" alt="Python FastAPI" />
+  <img src="https://img.shields.io/badge/Frontend-React-61DAFB" alt="Frontend React" />
+  <img src="https://img.shields.io/badge/Goal-Post%20Office%20%26%20PIN%20Detection-success" alt="Post Office Detection" />
+</p>
+
+> Smart postal address understanding for India — identify the correct Post Office and PIN code from messy or incomplete address data.
+
+This project was fully developed by the author as a practical AI-driven solution for Indian postal address normalization and Post Office identification.
 
 ## Overview
 
-The system takes raw address text, understands the important postal fields such as locality, district, state, landmark, and PIN code, and matches them against a local postal database to identify the most likely Post Office. It uses AI/NLP parsing when available and falls back to a rule-based parser when needed.
+The system takes raw address text, understands key postal fields such as locality, district, state, landmark, and PIN code, and matches them against a local postal database to identify the most likely Post Office. It uses AI/NLP parsing when available and falls back to a rule-based parser when needed.
 
-The solution is designed to handle real-world Indian address variations, including:
+This solution is designed to handle real Indian address variations such as:
 
 - short or informal locality names
-- missing or incomplete state/district information
+- missing district or state details
 - spelling variations
 - landmark-based references
 - wrong or mismatched PIN codes
 
----
+## Why this project matters
 
-## Problem Statement
+Indian addresses are often written in unstructured or inconsistent formats. In many cases, a person provides only part of the address, a nearby landmark, or a shortened locality name. Manually identifying the correct Post Office and PIN code can be slow and error-prone.
 
-Indian addresses are often written in unstructured or inconsistent formats. People may provide a locality name, nearby landmark, district, or only a shortened version of the address. Manually identifying the correct Post Office and PIN code can be slow and error-prone.
-
-This project solves that by automatically normalizing the address and matching it against a postal dataset to suggest the best possible Post Office and PIN code.
-
----
+This application solves that problem by normalizing address inputs and matching them against a postal dataset to suggest the best candidate office with confidence-based reasoning.
 
 ## Features
 
-- Raw address input with validation
-- AI-based address parsing using OpenAI-compatible LLM support
-- Rule-based fallback parser for offline or no-API-key scenarios
-- Postal record matching using locality, district, state, office name, and PIN
-- Confidence score for each match
-- Alternative candidate suggestions when confidence is not high
+- Raw address input and validation
+- AI-based address parsing with LLM support
+- Rule-based fallback parser when AI is unavailable
+- Fuzzy matching against postal records
+- Confidence scoring for the best result
+- Alternative office suggestions
 - PIN mismatch detection and warnings
-- User prompts for missing address details when needed
-- Camera capture and image upload support for address scanning
-- Modern React-based frontend UI
-
----
+- User prompts for missing information when confidence is low
+- Image upload and camera capture support for address scanning
+- Clean React frontend for result visualization
 
 ## Tech Stack
 
@@ -51,33 +54,28 @@ This project solves that by automatically normalizing the address and matching i
 - Python
 - FastAPI
 - Pydantic
-- RapidFuzz for fuzzy matching
-- SQLite / postal dataset storage
+- RapidFuzz
+- SQLite / local postal dataset
 
-### AI / Parsing
-- OpenAI API support (optional)
-- Rule-based parser fallback
+### AI and Parsing
+- OpenAI-compatible API support
+- Rule-based fallback parser
 
----
+## Architecture
 
-## Project Architecture
+The application is built with a simple two-part architecture:
 
-The application has two major parts:
-
-1. Frontend UI
-   - Accepts the address input
-   - Supports OCR/image upload
-   - Displays the parsed result and confidence
+1. Frontend interface
+   - accepts address input or image upload
+   - displays parsed output and best matches
+   - shows confidence and alternatives
 
 2. Backend API
-   - Parses the input address
-   - Normalizes the address fields
-   - Searches the postal dataset
-   - Returns the best match and alternatives
+   - parses and normalizes the address
+   - searches postal data using locality, district, state, and PIN
+   - returns the best Post Office match with explanations
 
----
-
-## Folder Structure
+## Project Structure
 
 ```bash
 SIH/
@@ -97,66 +95,77 @@ SIH/
 │   │   │   ├── test_locality_filter.py
 │   │   │   └── test_parser_aliases.py
 │   │   ├── main.py
+│   │   ├── postal.db
 │   │   └── requirements.txt
-│   └── frontend/
-│       ├── src/
-│       ├── index.html
-│       ├── package.json
-│       └── vite.config.js
+│   ├── frontend/
+│   │   ├── src/
+│   │   ├── index.html
+│   │   ├── package.json
+│   │   └── vite.config.js
+│   └── README.md
 ├── run_full_app.ps1
 └── README.md
 ```
 
----
+## Quick Start
 
-## How It Works
-
-1. The user enters or uploads an address.
-2. The backend parses the address into structured components.
-3. The system searches the database for matching postal records.
-4. It scores each candidate using fuzzy matching and weighted rules.
-5. The best result is returned with confidence and explanation.
-6. If the result is uncertain, alternatives are shown and the user can provide more information.
-
----
-
-## Example Use Cases
-
-- Identify the correct Post Office from a short address string
-- Validate whether the provided PIN code matches the expected office
-- Help logistics teams improve delivery address verification
-- Assist users in understanding postal data for Indian locations
-
----
-
-## Setup Instructions
-
-### 1. Backend Setup
+### 1. Backend
 
 ```bash
-cd aipin/backend
+cd backend
 pip install -r requirements.txt
-```
-
-Run the FastAPI server:
-
-```bash
 uvicorn main:app --reload
 ```
 
-The backend will be available at:
+API docs will be available at:
 
-- http://localhost:8000
-- Swagger docs: http://localhost:8000/docs
+- http://localhost:8000/docs
 
-### 2. Frontend Setup
+### 2. Frontend
 
 ```bash
-cd aipin/frontend
+cd frontend
 npm install
 npm run dev
 ```
 
+Frontend will run at:
+
+- http://localhost:5173
+
+### 3. Run both together
+
+```powershell
+./run_full_app.ps1
+```
+
+## Example Inputs
+
+- near KGiSL college, Saravanampatti, Coimbatore, Tamil Nadu
+- Anna Nagar, Chennai, Tamil Nadu
+- RS Puram CBE TamilNadu 641002
+- Saravanampatti, Coimbatore, 641035
+
+## Important Note
+
+This project uses a prototype local postal dataset for demonstration and research purposes. It is not directly integrated with official India Post live systems.
+
+## Future Improvements
+
+- official postal data integration
+- multilingual address parsing
+- improved OCR and handwriting support
+- better confidence modeling
+- production-ready deployment
+
+## Conclusion
+
+This project demonstrates a practical and intelligent way to solve Indian postal address ambiguity using AI, fuzzy matching, and structured postal data. It provides a smart and user-friendly way to identify the correct Post Office and PIN code from imperfect address inputs.
+
+This repository represents a complete solution developed by the author for postal intelligence and address normalization.
+
+
+<<<<<<< HEAD
 The frontend typically runs at:
 
 - http://localhost:5173
@@ -166,11 +175,19 @@ The frontend typically runs at:
 ## Run All in One Command
 
 A PowerShell wrapper is included to run the project together:
+=======
+Frontend will run at:
+
+- http://localhost:5173
+
+### 3. Run both together
+>>>>>>> e473fe3 (Improve GitHub presentation)
 
 ```powershell
 ./run_full_app.ps1
 ```
 
+<<<<<<< HEAD
 ---
 
 ## Important Note
@@ -194,3 +211,29 @@ This project uses a prototype or local postal dataset and is intended for demons
 This project demonstrates an intelligent and practical approach to solving Indian postal address ambiguity using AI and data-driven matching. It provides a smart and user-friendly way to identify the correct Post Office and PIN code from imperfect address inputs.
 
 This repository represents a complete solution developed by the author for the purpose of postal intelligence and address normalization.
+=======
+## Example Inputs
+
+- near KGiSL college, Saravanampatti, Coimbatore, Tamil Nadu
+- Anna Nagar, Chennai, Tamil Nadu
+- RS Puram CBE TamilNadu 641002
+- Saravanampatti, Coimbatore, 641035
+
+## Important Note
+
+This project uses a prototype local postal dataset for demonstration and research purposes. It is not directly integrated with official India Post live systems.
+
+## Future Improvements
+
+- official postal data integration
+- multilingual address parsing
+- improved OCR and handwriting support
+- better confidence modeling
+- production-ready deployment
+
+## Conclusion
+
+This project demonstrates a practical and intelligent way to solve Indian postal address ambiguity using AI, fuzzy matching, and structured postal data. It provides a smart and user-friendly way to identify the correct Post Office and PIN code from imperfect address inputs.
+
+This repository represents a complete solution developed by the author for postal intelligence and address normalization.
+>>>>>>> e473fe3 (Improve GitHub presentation)
