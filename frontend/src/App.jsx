@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import Tesseract from 'tesseract.js'
 
 const API_BASE = '' // empty = same origin; Vite proxy routes to localhost:8000
 
@@ -54,7 +55,7 @@ function NormalizedAddressCard({ norm, parserUsed }) {
   ]
   return (
     <div className="normalized-card">
-      <h3>AI-Understood Address <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>— parsed by <strong>{parserUsed === 'llm' ? 'AI (LLM)' : 'rule-based fallback'}</strong></span></h3>
+      <h3>AI-Understood Address <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, color: 'var(--text-muted)' }}>— parsed by <strong style={{ color: 'var(--text-secondary)' }}>{parserUsed === 'llm' ? 'AI (LLM)' : 'rule-based fallback'}</strong></span></h3>
       <div className="normalized-grid">
         {fields.map(f => (
           <div className="norm-field" key={f.label}>
@@ -87,12 +88,231 @@ function AltCard({ alt }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Screen: Camera Scanner
+// ─────────────────────────────────────────────────────────────────────────────
+
+function CameraScreen({ onCapture, onCancel }) {
+  const videoRef = useRef(null)
+  const fileInputRef = useRef(null)
+  const [stream, setStream] = useState(null)
+  const [error, setError] = useState('')
+  const [loadingCamera, setLoadingCamera] = useState(true)
+  const [cameraAttempt, setCameraAttempt] = useState(0)
+
+  const stopStream = useCallback(() => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop())
+      setStream(null)
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null
+    }
+  }, [stream])
+
+  useEffect(() => {
+    let active = true
+    let mediaStream = null
+
+    async function startCamera() {
+      setLoadingCamera(true)
+      setError('')
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        if (active) {
+          setError('This browser does not support camera access. Please upload an image instead.')
+          setLoadingCamera(false)
+        }
+        return
+      }
+
+      if (window.location.protocol !== 'http:' && window.location.protocol !== 'https:') {
+        if (active) {
+          setError('Camera access requires a web page served over localhost or HTTPS. Please upload an image instead.')
+          setLoadingCamera(false)
+        }
+        return
+      }
+
+      try {
+        const permission = await navigator.permissions.query({ name: 'camera' })
+        if (permission.state === 'denied') {
+          if (active) {
+            setError('Camera is blocked for this site in your browser. Allow Camera in the address-bar site settings, then click Try Camera Again.')
+            setLoadingCamera(false)
+          }
+          return
+        }
+      } catch {
+      }
+
+      try {
+        // Try back camera first on mobile
+        try {
+          mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { ideal: 'environment' } }
+          })
+        } catch (e1) {
+          // Fallback to any available camera (webcam, laptop camera, etc.)
+          mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: true
+          })
+        }
+
+        if (!active) {
+          if (mediaStream) mediaStream.getTracks().forEach(t => t.stop())
+          return
+        }
+
+        setStream(mediaStream)
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream
+          videoRef.current.muted = true
+          videoRef.current.play().catch(() => {})
+        }
+      } catch (err) {
+        if (active) {
+          setError('Camera permission was denied or no camera is available. You can upload an image instead.')
+        }
+      } finally {
+        if (active) setLoadingCamera(false)
+      }
+    }
+
+    startCamera()
+    return () => {
+      active = false
+      if (mediaStream) mediaStream.getTracks().forEach(t => t.stop())
+    }
+  }, [cameraAttempt])
+
+  const handleCapture = useCallback(() => {
+    if (!videoRef.current) return
+    const video = videoRef.current
+    if (video.videoWidth === 0 || video.videoHeight === 0) {
+      setError('Camera is not ready yet. Please wait a moment or upload an image instead.')
+      return
+    }
+    const canvas = document.createElement('canvas')
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      setError('Unable to capture the camera frame. Please upload an image instead.')
+      return
+    }
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+    stopStream()
+    onCapture(canvas.toDataURL('image/jpeg'))
+  }, [onCapture, stopStream])
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      stopStream()
+      onCapture(event.target.result)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleCancel = () => {
+    stopStream()
+    onCancel()
+  }
+
+  return (
+    <div className="camera-card screen-enter">
+      <h2 id="camera-title">Scan Postal Address</h2>
+      <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: 16 }}>
+        Capture a live photo of the address label or upload an image file
+      </p>
+
+      <div className="video-container">
+        {loadingCamera && (
+          <div style={{ color: '#fff', padding: 40, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+            <div className="spinner" style={{ width: 32, height: 32, margin: 0 }} />
+            <span>Accessing camera…</span>
+          </div>
+        )}
+        {error ? (
+          <div style={{ color: '#ff6b7a', padding: '36px 20px', background: 'rgba(255, 107, 122, 0.08)' }}>
+            <div style={{ fontSize: '2rem', marginBottom: 8 }}>📷</div>
+            <p style={{ fontWeight: 600, color: '#e84393' }}>{error}</p>
+            <button
+              type="button"
+              className="btn-secondary"
+              style={{ maxWidth: 260, margin: '18px auto 0' }}
+              onClick={() => setCameraAttempt(attempt => attempt + 1)}
+            >
+              Try Camera Again
+            </button>
+          </div>
+        ) : (
+          <video ref={videoRef} className="video-feed" autoPlay playsInline muted />
+        )}
+      </div>
+
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept="image/*"
+        capture="environment"
+        style={{ display: 'none' }}
+        onChange={handleFileChange}
+      />
+
+      <div className="button-group" style={{ marginTop: 16 }}>
+        {!error && (
+          <button className="btn-primary" onClick={handleCapture} disabled={loadingCamera || !stream}>
+            📸 Capture Photo
+          </button>
+        )}
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          📁 Upload Image File
+        </button>
+      </div>
+
+      <button className="btn-cancel" onClick={handleCancel}>
+        Cancel & Return
+      </button>
+    </div>
+  )
+}
+
+function OCRLoadingScreen({ imageData }) {
+  return (
+    <div className="loading-card screen-enter" role="status" aria-live="polite">
+      {imageData && (
+        <img
+          src={imageData}
+          alt="Captured address"
+          style={{ width: '100%', maxHeight: 280, objectFit: 'contain', borderRadius: 10, marginBottom: 18 }}
+        />
+      )}
+      <div className="spinner" aria-hidden="true" />
+      <p style={{ fontWeight: 600, marginBottom: 8, color: 'var(--text-primary)' }}>Extracting address from image…</p>
+      <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>OCR is scanning postal text with AI…</p>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Screen: Input
 // ─────────────────────────────────────────────────────────────────────────────
 
-function InputScreen({ onSubmit, parserStatus }) {
-  const [text, setText] = useState('')
+function InputScreen({ onSubmit, parserStatus, onOpenScanner, onUploadImage, initialText = '' }) {
+  const [text, setText] = useState(initialText)
   const [error, setError] = useState('')
+  const fileInputRef = useRef(null)
+
+  useEffect(() => {
+    if (initialText) setText(initialText)
+  }, [initialText])
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -103,8 +323,18 @@ function InputScreen({ onSubmit, parserStatus }) {
     onSubmit(trimmed)
   }
 
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      onUploadImage(event.target.result)
+    }
+    reader.readAsDataURL(file)
+  }
+
   return (
-    <div className="input-card">
+    <div className="input-card screen-enter">
       <form onSubmit={handleSubmit}>
         <label htmlFor="address-input">
           Enter a postal address — complete, partial, or messy
@@ -122,14 +352,34 @@ function InputScreen({ onSubmit, parserStatus }) {
             {error}
           </div>
         )}
-        <button
-          type="submit"
-          className="btn-primary"
-          disabled={!text.trim()}
-          aria-label="Find Post Office"
-        >
-          Find Post Office
-        </button>
+        
+        <input
+          type="file"
+          ref={fileInputRef}
+          accept="image/*"
+          capture="environment"
+          style={{ display: 'none' }}
+          onChange={handleFileChange}
+        />
+
+        <div className="button-group">
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={onOpenScanner}
+            aria-label="Scan Address with Camera"
+          >
+            📷 Scan / Upload Image
+          </button>
+          <button
+            type="submit"
+            className="btn-primary"
+            disabled={!text.trim()}
+            aria-label="Find Post Office"
+          >
+            Find Post Office
+          </button>
+        </div>
       </form>
 
       <div className="examples" aria-label="Example addresses">
@@ -160,7 +410,7 @@ function LoadingScreen() {
   return (
     <div className="loading-card" role="status" aria-live="polite">
       <div className="spinner" aria-hidden="true" />
-      <p style={{ fontWeight: 600, color: '#333', marginBottom: 8 }}>Processing address…</p>
+      <p style={{ fontWeight: 600, marginBottom: 8 }}>Processing address…</p>
       <ul className="loading-steps" aria-label="Processing steps">
         <li>🧠 Understanding address…</li>
         <li>🔍 Searching postal records…</li>
@@ -180,7 +430,7 @@ function ResultScreen({ data, onBack }) {
           alternatives, warning, needs_more_info, prompt_fields } = data
 
   return (
-    <div>
+    <div className="screen-enter">
       <div className="result-header">
         <h2>Results</h2>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -192,8 +442,8 @@ function ResultScreen({ data, onBack }) {
       </div>
 
       {/* Input echo */}
-      <div style={{ marginBottom: 16, fontSize: '0.85rem', color: '#888' }}>
-        Input: <em style={{ color: '#444' }}>"{input_address}"</em>
+      <div style={{ marginBottom: 16, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+        Input: <em style={{ color: 'var(--text-secondary)' }}>"{input_address}"</em>
       </div>
 
       {/* Normalized address — the AI Understanding step */}
@@ -285,18 +535,108 @@ function ResultScreen({ data, onBack }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [screen, setScreen] = useState('input')   // 'input' | 'loading' | 'result'
+  const [screen, setScreen] = useState('input')
   const [result, setResult] = useState(null)
   const [parserStatus, setParserStatus] = useState(null)
   const [apiError, setApiError] = useState('')
+  const [scannedText, setScannedText] = useState('')
+  const [capturedImage, setCapturedImage] = useState('')
 
-  // Fetch parser status on mount
   useEffect(() => {
     fetch(`${API_BASE}/parser-status`)
       .then(r => r.json())
       .then(d => setParserStatus(d))
       .catch(() => setParserStatus({ parser: 'unknown' }))
   }, [])
+
+  async function handleCapture(imageData) {
+    setApiError('')
+    setCapturedImage(imageData)
+    setScreen('ocr-loading')
+    try {
+      const image = await loadImage(imageData)
+      if (!hasUsableImageContent(image)) {
+        throw new Error('The photo appears blank or too dark. Please point the camera at the address label and try again.')
+      }
+      const processedImage = preprocessForOcr(image)
+      const [originalResult, processedResult] = await Promise.all([
+        Tesseract.recognize(imageData, 'eng', { logger: () => {} }),
+        Tesseract.recognize(processedImage, 'eng', { logger: () => {} }),
+      ])
+      const candidates = [originalResult, processedResult]
+        .map(result => ({
+          text: result.data.text.replace(/\s+/g, ' ').trim(),
+          confidence: Number(result.data.confidence) || 0,
+        }))
+        .filter(candidate => isUsableOcr(candidate.text, candidate.confidence))
+        .sort((a, b) => ocrScore(b) - ocrScore(a))
+      if (!candidates[0]) {
+        throw new Error('No clear address text was found. Please retake the photo with the label in focus.')
+      }
+      setScannedText(candidates[0].text)
+      setScreen('input')
+    } catch (err) {
+      setApiError(err.message || 'Failed to extract readable text from image.')
+      setScreen('input')
+    }
+  }
+
+  function loadImage(imageData) {
+    return new Promise((resolve, reject) => {
+      const image = new Image()
+      image.onload = () => resolve(image)
+      image.onerror = () => reject(new Error('The captured image could not be loaded. Please try again.'))
+      image.src = imageData
+    })
+  }
+
+  function preprocessForOcr(image) {
+    const scale = Math.max(1, Math.min(3, 1800 / image.width))
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.round(image.width * scale)
+    canvas.height = Math.round(image.height * scale)
+    const context = canvas.getContext('2d', { willReadFrequently: true })
+    context.filter = 'grayscale(1) contrast(1.35)'
+    context.drawImage(image, 0, 0, canvas.width, canvas.height)
+    return canvas.toDataURL('image/png')
+  }
+
+  function hasUsableImageContent(image) {
+    const canvas = document.createElement('canvas')
+    const size = 120
+    canvas.width = size
+    canvas.height = size
+    const context = canvas.getContext('2d', { willReadFrequently: true })
+    context.drawImage(image, 0, 0, size, size)
+    const pixels = context.getImageData(0, 0, size, size).data
+    let sum = 0
+    let sumSquares = 0
+    let minimum = 255
+    let maximum = 0
+    for (let index = 0; index < pixels.length; index += 4) {
+      const brightness = (pixels[index] * 0.299) + (pixels[index + 1] * 0.587) + (pixels[index + 2] * 0.114)
+      sum += brightness
+      sumSquares += brightness * brightness
+      minimum = Math.min(minimum, brightness)
+      maximum = Math.max(maximum, brightness)
+    }
+    const count = pixels.length / 4
+    const variance = (sumSquares / count) - ((sum / count) ** 2)
+    return maximum - minimum >= 24 && variance >= 45
+  }
+
+  function isUsableOcr(text, confidence) {
+    const words = text.match(/[A-Za-z]{2,}/g) || []
+    const letters = (text.match(/[A-Za-z]/g) || []).length
+    const usefulCharacters = (text.match(/[A-Za-z0-9 ,.-]/g) || []).length
+    const hasPostalSignal = /\b\d{6}\b/.test(text) || words.length >= 3
+    return confidence >= 35 && words.length >= 2 && hasPostalSignal && letters >= 8 && usefulCharacters / Math.max(text.length, 1) >= 0.55
+  }
+
+  function ocrScore(candidate) {
+    const postalBonus = /\b\d{6}\b/.test(candidate.text) ? 25 : 0
+    return candidate.confidence + postalBonus + Math.min(candidate.text.length, 100) / 10
+  }
 
   async function handleSubmit(address) {
     setApiError('')
@@ -323,6 +663,7 @@ export default function App() {
   function handleBack() {
     setResult(null)
     setApiError('')
+    setScannedText('')
     setScreen('input')
   }
 
@@ -358,9 +699,11 @@ export default function App() {
 
       {/* Screens */}
       <main>
-        {screen === 'input'   && <InputScreen   onSubmit={handleSubmit} parserStatus={parserStatus} />}
+        {screen === 'input'   && <InputScreen onSubmit={handleSubmit} parserStatus={parserStatus} onOpenScanner={() => setScreen('camera')} onUploadImage={handleCapture} initialText={scannedText} />}
         {screen === 'loading' && <LoadingScreen />}
         {screen === 'result'  && result && <ResultScreen data={result} onBack={handleBack} />}
+        {screen === 'camera'  && <CameraScreen onCapture={handleCapture} onCancel={() => setScreen('input')} />}
+        {screen === 'ocr-loading' && <OCRLoadingScreen imageData={capturedImage} />}
       </main>
     </div>
   )

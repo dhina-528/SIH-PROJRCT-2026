@@ -129,6 +129,11 @@ LOCALITY_ALIASES: dict[str, str] = {
     "kk nagar": "KK Nagar",
     "r a puram": "RA Puram",
     "ra puram": "RA Puram",
+    "saravanampatty": "Saravanampatti",
+    "saravanampatti": "Saravanampatti",
+    "kgisl college": "KGiSL College",
+    "kgisl clg": "KGiSL College",
+    "kgisl": "KGiSL",
 }
 
 
@@ -157,20 +162,37 @@ def _normalize_text(text: str) -> str:
 def _extract_landmark(text: str) -> tuple[Optional[str], str]:
     """
     If the text contains a landmark prefix (e.g. 'near', 'opp'),
-    extract the following phrase as the landmark.
-    Returns (landmark_or_None, text_with_landmark_removed).
+    extract ONLY the next 1-2 words as the landmark to avoid swallowing
+    the rest of the address (locality, district, state tokens).
+    The remaining tokens after the landmark are returned in the cleaned text.
+    Returns (landmark_or_None, text_with_landmark_prefix_removed).
     """
     for prefix in LANDMARK_PREFIXES:
         pattern = rf"\b{re.escape(prefix)}\s+([^,\n]+)"
         m = re.search(pattern, text, re.IGNORECASE)
         if m:
-            landmark_phrase = m.group(1).strip()
-            # Limit to ~4 words to avoid grabbing the whole address
-            landmark_words = landmark_phrase.split()[:5]
-            landmark = " ".join(landmark_words).title()
-            # Remove the matched span from the text
-            cleaned = text[:m.start()] + text[m.end():]
-            return landmark, cleaned.strip()
+            full_phrase = m.group(1).strip()
+            all_words = full_phrase.split()
+            # Take only 2 words as the landmark name (e.g. "KGiSL College")
+            # Return the rest back into the address text for district/state matching
+            landmark_words = all_words[:2]
+            remaining_words = all_words[2:]
+            landmark = " ".join(landmark_words)
+            for alias_key, alias_val in LOCALITY_ALIASES.items():
+                if landmark.lower() == alias_key:
+                    landmark = alias_val
+                    break
+            if landmark and not any(ch.isupper() for ch in landmark):
+                landmark = landmark.title()
+            if landmark.lower() == 'kgisl' and not landmark.startswith('KGiSL'):
+                landmark = 'KGiSL'
+            # Build cleaned text: text before match + remaining words + text after match
+            before = text[:m.start()]
+            after = text[m.end():]
+            remainder = " ".join(remaining_words)
+            cleaned = (before + " " + remainder + " " + after).strip()
+            cleaned = re.sub(r"\s+", " ", cleaned)
+            return landmark, cleaned
     return None, text
 
 

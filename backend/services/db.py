@@ -65,6 +65,11 @@ def search_candidates(
             clauses.append("pincode = ?")
             params.append(pincode)
 
+        # Locality is a strong signal and should narrow the search before fuzzy scoring.
+        if locality:
+            clauses.append("LOWER(locality) LIKE ?")
+            params.append(f"%{locality.lower()}%")
+
         # State narrows the search significantly
         if state:
             clauses.append("LOWER(state) LIKE ?")
